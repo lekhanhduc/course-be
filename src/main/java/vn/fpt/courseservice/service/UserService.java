@@ -12,6 +12,7 @@ import vn.fpt.courseservice.dto.request.UserUpdateRequest;
 import vn.fpt.courseservice.dto.response.PageResponse;
 import vn.fpt.courseservice.dto.response.UserCreationResponse;
 import vn.fpt.courseservice.dto.response.UserDetailResponse;
+import vn.fpt.courseservice.mapper.UserMapper;
 import vn.fpt.courseservice.model.User;
 import vn.fpt.courseservice.repository.UserRepository;
 import java.util.List;
@@ -21,24 +22,21 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     public UserCreationResponse createUser(UserCreationRequest request) {
         if(userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already in use");
         }
 
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-        User user = User.builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .build();
+        User user = userMapper.toUser(request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         userRepository.save(user);
 
-        return UserCreationResponse.builder()
-                .email(request.getEmail())
-                .build();
+        return userMapper.toUserResponse(user);
     }
 
     public PageResponse<UserDetailResponse> getUsers(int page, int size) {

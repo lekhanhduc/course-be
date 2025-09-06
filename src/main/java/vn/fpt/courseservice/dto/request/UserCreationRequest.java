@@ -7,6 +7,12 @@ import org.hibernate.validator.constraints.Length;
 @Getter
 public class UserCreationRequest {
 
+    @NotBlank(message = "FirstName cannot be blank")
+    private String firstName;
+
+    @NotBlank(message = "LastName cannot be blank")
+    private String lastName;
+
     @NotBlank(message = "Email cannot be blank")
     private String email;
 
