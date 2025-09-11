@@ -4,6 +4,7 @@ import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import vn.fpt.courseservice.model.User;
 import java.time.Instant;
@@ -25,7 +26,7 @@ public class JwtService {
                 .subject(user.getId().toString())
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now().plus(30, ChronoUnit.MINUTES).toEpochMilli()))
-                .claim("roles", "USER")
+                .claim("authorities", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
                 .build();
 
         Payload payload = new Payload(claimsSet.toJSONObject());

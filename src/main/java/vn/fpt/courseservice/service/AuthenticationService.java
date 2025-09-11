@@ -2,38 +2,40 @@ package vn.fpt.courseservice.service;
 
 import com.nimbusds.jose.JOSEException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import vn.fpt.courseservice.dto.request.LoginRequest;
 import vn.fpt.courseservice.dto.response.LoginResponse;
-import vn.fpt.courseservice.repository.UserRepository;
+import vn.fpt.courseservice.model.User;
 
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
 
-    private final UserRepository userRepository;
     private final JwtService jwtService;
-    private final PasswordEncoder passwordEncoder;
+
+    private final AuthenticationManager authenticationManager;
 
     public LoginResponse login(LoginRequest request) throws JOSEException {
-        // login -> kiêm tra email & passowrd
-        var user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(()->new UsernameNotFoundException("User not found"));
-        // kiểm tra password
-        if(!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Incorrect password");
-        }
-        // tạo token
+        String email = request.getEmail();
+        String password = request.getPassword();
+
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(email, password);
+
+        Authentication authenticate = authenticationManager.authenticate(authenticationToken);
+
+        User user = (User) authenticate.getPrincipal();
+
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 
-        // trả về cho client
         return LoginResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
+                .roles(user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
                 .build();
     }
 

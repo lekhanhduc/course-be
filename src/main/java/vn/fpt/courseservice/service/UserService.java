@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,9 @@ import vn.fpt.courseservice.dto.response.PageResponse;
 import vn.fpt.courseservice.dto.response.UserCreationResponse;
 import vn.fpt.courseservice.dto.response.UserDetailResponse;
 import vn.fpt.courseservice.mapper.UserMapper;
+import vn.fpt.courseservice.model.Role;
 import vn.fpt.courseservice.model.User;
+import vn.fpt.courseservice.repository.RoleRepository;
 import vn.fpt.courseservice.repository.UserRepository;
 import java.util.List;
 
@@ -24,21 +27,28 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
     public UserCreationResponse createUser(UserCreationRequest request) {
         if(userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already in use");
         }
 
-
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
+        Role role = roleRepository.findByName("USER").orElseGet(() -> roleRepository.save(Role.builder()
+                        .name("USER")
+                        .description("USER role")
+                .build()));
+
+        user.addRole(role);
         userRepository.save(user);
 
         return userMapper.toUserResponse(user);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     public PageResponse<UserDetailResponse> getUsers(int page, int size) {
 
         Pageable pageable = PageRequest.of(page - 1, size);
