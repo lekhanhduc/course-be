@@ -28,12 +28,8 @@ public class UserController {
     @GetMapping("/users")
     ResponseEntity<PageResponse<UserDetailResponse>> getUsers(
             @RequestParam(required = false, defaultValue = "1") int page,
-                                              @RequestParam(required = false, defaultValue = "2") int size) {
-        try {
+            @RequestParam(required = false, defaultValue = "2") int size) {
             return ResponseEntity.ok(userService.getUsers(page, size));
-        } catch (RuntimeException e){
-            return ResponseEntity.badRequest().build();
-        }
     }
 
     @DeleteMapping("/users/{id}")
@@ -45,4 +41,5 @@ public class UserController {
     UserDetailResponse updateUserById(@PathVariable Long id, @RequestBody UserUpdateRequest request) {
         return userService.updateUser(id, request);
     }
+
 }
