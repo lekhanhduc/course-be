@@ -10,6 +10,7 @@ import vn.fpt.courseservice.model.User;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.UUID;
 
 @Service
 public class JwtService {
@@ -26,6 +27,7 @@ public class JwtService {
                 .subject(user.getId().toString())
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now().plus(30, ChronoUnit.MINUTES).toEpochMilli()))
+                .jwtID(UUID.randomUUID().toString())
                 .claim("authorities", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
                 .build();
 
