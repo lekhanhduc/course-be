@@ -106,10 +106,14 @@ public class AuthenticationService {
         if(byId.isPresent()) {
             throw new RuntimeException("Token is logged");
         }
+        Long userId = Long.parseLong(signedJWT.getJWTClaimsSet().getSubject());
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         boolean isValid = signedJWT.verify(new MACVerifier(secretKey));
         return VerifyTokenResponse.builder()
                 .isValid(isValid)
+                .roles(user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
                 .build();
     }
 
