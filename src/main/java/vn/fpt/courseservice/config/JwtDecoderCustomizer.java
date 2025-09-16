@@ -46,7 +46,6 @@ public class JwtDecoderCustomizer implements JwtDecoder {
                         .build();
             }
             return nimbusJwtDecoder.decode(token);
-
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }

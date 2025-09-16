@@ -5,7 +5,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.fpt.courseservice.dto.request.LoginRequest;
+import vn.fpt.courseservice.dto.request.RefreshTokenRequest;
+import vn.fpt.courseservice.dto.request.VerifyTokenRequest;
 import vn.fpt.courseservice.dto.response.LoginResponse;
+import vn.fpt.courseservice.dto.response.RefreshTokenResponse;
+import vn.fpt.courseservice.dto.response.VerifyTokenResponse;
 import vn.fpt.courseservice.service.AuthenticationService;
 
 import java.text.ParseException;
@@ -28,6 +32,18 @@ public class AuthenticationController {
         String token = authToken.replace("Bearer ", "");
         authenticationService.logout(token);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<RefreshTokenResponse> refreshToken(@RequestBody RefreshTokenRequest request) throws JOSEException, ParseException {
+        var result = authenticationService.refreshToken(request);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/verify-token")
+    public ResponseEntity<VerifyTokenResponse> verifyToken(@RequestBody VerifyTokenRequest request) throws JOSEException, ParseException {
+        var result = authenticationService.verifyToken(request);
+        return ResponseEntity.ok(result);
     }
 
 }
