@@ -17,6 +17,7 @@ import vn.fpt.courseservice.dto.request.VerifyTokenRequest;
 import vn.fpt.courseservice.dto.response.LoginResponse;
 import vn.fpt.courseservice.dto.response.RefreshTokenResponse;
 import vn.fpt.courseservice.dto.response.VerifyTokenResponse;
+import vn.fpt.courseservice.exception.AppException;
 import vn.fpt.courseservice.model.TokenInValid;
 import vn.fpt.courseservice.model.User;
 import vn.fpt.courseservice.repository.TokenInvalidRepository;
@@ -79,12 +80,12 @@ public class AuthenticationService {
         SignedJWT signedJWT = SignedJWT.parse(refreshToken);
         Date date = signedJWT.getJWTClaimsSet().getExpirationTime();
         if(date.before(new Date())) {
-            throw new RuntimeException("Token expired");
+            throw new AppException("Token expired");
         }
 
         Long userId = Long.parseLong(signedJWT.getJWTClaimsSet().getSubject());
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new AppException("User not found"));
 
         String accessToken = jwtService.generateAccessToken(user);
 
@@ -98,17 +99,17 @@ public class AuthenticationService {
         SignedJWT signedJWT = SignedJWT.parse(accessToken);
         Date date = signedJWT.getJWTClaimsSet().getExpirationTime();
         if(date.before(new Date())) {
-            throw new RuntimeException("Token expired");
+            throw new AppException("Token expired");
         }
 
         String jwtId = signedJWT.getJWTClaimsSet().getJWTID();
         Optional<TokenInValid> byId = tokenInvalidRepository.findById(jwtId);
         if(byId.isPresent()) {
-            throw new RuntimeException("Token is logged");
+            throw new AppException("Token is logged");
         }
         Long userId = Long.parseLong(signedJWT.getJWTClaimsSet().getSubject());
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new AppException("User not found"));
 
         boolean isValid = signedJWT.verify(new MACVerifier(secretKey));
         return VerifyTokenResponse.builder()

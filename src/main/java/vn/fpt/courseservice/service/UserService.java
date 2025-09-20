@@ -13,6 +13,8 @@ import vn.fpt.courseservice.dto.request.UserUpdateRequest;
 import vn.fpt.courseservice.dto.response.PageResponse;
 import vn.fpt.courseservice.dto.response.UserCreationResponse;
 import vn.fpt.courseservice.dto.response.UserDetailResponse;
+import vn.fpt.courseservice.exception.AppException;
+import vn.fpt.courseservice.exception.ResourceNotFoundException;
 import vn.fpt.courseservice.mapper.UserMapper;
 import vn.fpt.courseservice.model.Role;
 import vn.fpt.courseservice.model.User;
@@ -28,10 +30,11 @@ public class UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
+    private final NotificationService notificationService;
 
     public UserCreationResponse createUser(UserCreationRequest request) {
         if(userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already in use");
+            throw new AppException("Email already in use");
         }
 
         User user = userMapper.toUser(request);
@@ -44,6 +47,8 @@ public class UserService {
 
         user.addRole(role);
         userRepository.save(user);
+
+        notificationService.sendNotification("New User created");
 
         return userMapper.toUserResponse(user);
     }
@@ -72,14 +77,14 @@ public class UserService {
 
     public void deleteUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         userRepository.deleteById(user.getId());
     }
 
     public UserDetailResponse updateUser(Long id, UserUpdateRequest request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new AppException("User not found"));
 
         if(request.getUsername() != null) {
             user.setUsername(request.getUsername());
