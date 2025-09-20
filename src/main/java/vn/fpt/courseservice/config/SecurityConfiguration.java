@@ -3,7 +3,6 @@ package vn.fpt.courseservice.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
@@ -19,9 +18,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import vn.fpt.courseservice.service.NotificationService;
 import vn.fpt.courseservice.service.UserDetailServiceImpl;
-import vn.fpt.courseservice.service.impl.SmsNotificationService;
+
 import java.util.List;
 
 @Configuration
@@ -60,12 +58,6 @@ public class SecurityConfiguration {
                         .accessDeniedHandler(new JwtAccessDeniedHandler())
                 );
         return http.build();
-    }
-
-    @Bean
-    @Primary
-    public NotificationService notificationService() {
-        return new SmsNotificationService();
     }
 
     @Bean

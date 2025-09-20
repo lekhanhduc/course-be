@@ -1,6 +1,8 @@
 package vn.fpt.courseservice.service;
 
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,10 +22,13 @@ import vn.fpt.courseservice.model.Role;
 import vn.fpt.courseservice.model.User;
 import vn.fpt.courseservice.repository.RoleRepository;
 import vn.fpt.courseservice.repository.UserRepository;
+
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
@@ -48,8 +53,11 @@ public class UserService {
         user.addRole(role);
         userRepository.save(user);
 
-        notificationService.sendNotification("New User created");
-
+        try {
+            notificationService.sendNotification(user.getEmail(), "Welcome the system", "Chào mừng " + user.getFirstName() + " " +user.getLastName()  + " đã đến với hệ thống");
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            log.info("Error sending notification");
+        }
         return userMapper.toUserResponse(user);
     }
 

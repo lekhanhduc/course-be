@@ -12,6 +12,10 @@ spring:
     hibernate:
       ddl-auto: update
 
+  mail:
+    username: lekhanhduc212003@gmail.com
+    password: uromwmbqiqfdhuzf
+
 jwt:
   secret-key: lKlcnqHur2/UedAIH1BRD9XwRcQJS5+toCGMSfbHd/ZZ91xFy16PA9UlDEKbO1q+nBEoJv+0LvSIowQTx83zkVSRJs5sYrLsoW3dY2WGrec=
 
