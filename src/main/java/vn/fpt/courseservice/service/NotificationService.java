@@ -6,4 +6,5 @@ import java.io.UnsupportedEncodingException;
 
 public interface NotificationService {
     void sendNotification(String to, String subject, String content) throws MessagingException, UnsupportedEncodingException;
+    void sendNotificationWithEmailTemplate(String to, String username, String subject, String templateName);
 }

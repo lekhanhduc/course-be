@@ -44,6 +44,7 @@ public class UserService {
 
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setUsername(user.getFirstName() + " " + user.getLastName());
 
         Role role = roleRepository.findByName("USER").orElseGet(() -> roleRepository.save(Role.builder()
                         .name("USER")
@@ -53,11 +54,13 @@ public class UserService {
         user.addRole(role);
         userRepository.save(user);
 
-        try {
-            notificationService.sendNotification(user.getEmail(), "Welcome the system", "Chào mừng " + user.getFirstName() + " " +user.getLastName()  + " đã đến với hệ thống");
-        } catch (MessagingException | UnsupportedEncodingException e) {
-            log.info("Error sending notification");
-        }
+        notificationService.sendNotificationWithEmailTemplate(
+                user.getEmail(),
+                user.getFirstName() + " " + user.getLastName(),
+                "Chào mừng " + user.getFirstName() + " " + user.getLastName() + " đã đến với hệ thống",
+                "email-welcome"
+                );
+
         return userMapper.toUserResponse(user);
     }
 
